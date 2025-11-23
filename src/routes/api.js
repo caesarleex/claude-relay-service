@@ -103,37 +103,15 @@ async function handleMessagesRequest(req, res) {
     // 检查是否为流式请求
     const isStream = req.body.stream === true
 
-    // Context Management Beta功能处理（PR #666智能修复）
-    // 官方文档：https://github.com/anthropics/anthropic-sdk-python/blob/main/examples/memory/basic.py
+    // 临时修复新版本客户端，删除context_management字段，避免报错
     if (req.body.context_management) {
-      const betaHeader = req.headers['anthropic-beta'] || ''
-      // 官方API常量（来自所有Anthropic SDK源代码）
-      const requiredBeta = 'context-management-2025-06-27'
-
-      if (betaHeader.includes(requiredBeta)) {
-        logger.debug(
-          `Context management enabled: ${req.apiKey.name}, ` +
-            `config: ${JSON.stringify(req.body.context_management)}`
-        )
-      } else {
-        logger.warn(
-          `Removing context_management (missing beta header '${requiredBeta}'): ` +
-            `key=${req.apiKey.name}, client=${req.headers['user-agent'] || 'unknown'}`
-        )
-        delete req.body.context_management
-      }
+      delete req.body.context_management
     }
 
-    // 移除 input_examples 字段（Claude Code v2.0.42+ 兼容性修复）
-    // 官方问题：https://github.com/anthropics/claude-code/issues/11678
-    // Anthropic API 在 2025-11-11 后拒绝 input_examples 字段（HTTP 400）
+    // 遍历tools数组，删除input_examples字段
     if (req.body.tools && Array.isArray(req.body.tools)) {
       req.body.tools.forEach((tool) => {
         if (tool && typeof tool === 'object' && tool.input_examples) {
-          logger.debug(
-            `Removing unsupported field 'input_examples' from tool '${tool.name || 'unnamed'}': ` +
-              `key=${req.apiKey.name}, client=${req.headers['user-agent'] || 'unknown'}`
-          )
           delete tool.input_examples
         }
       })
