@@ -1200,7 +1200,6 @@ async function handleStreamGenerateContent(req, res) {
     let usageReported = false // 修复：改为 let 以便后续修改
 
     // SSE 心跳机制：防止 Clash 等代理 120 秒超时
-    let heartbeatTimer = null
     let lastDataTime = Date.now()
     const HEARTBEAT_INTERVAL = 15000 // 15 秒
 
