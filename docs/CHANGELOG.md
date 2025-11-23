@@ -11,6 +11,51 @@
 
 ---
 
+## [2.0.24] - 2025-11-24
+
+### Added (from upstream v1.1.204)
+- ✨ Gemini API账户支持（使用API Key而非OAuth）
+- 🆕 新增geminiApiAccountService.js管理API账户
+- 📝 Gemini 3模型调用指南文档
+- 🔧 改进速率限制处理（使用accountId代替account.id，更安全）
+
+### Changed
+- 🔄 更新Codex prompt内容到最新版本（GPT-5基础）
+  - 从23KB优化到约12KB（减少约50%）
+  - 保留promptLoader实现（零硬编码）
+  - 用户仍可通过Web界面自定义prompt
+
+### Merged
+- 🔀 完整合并上游v1.1.204（commits bae39d54到691b492b）
+- 📦 保留我们的自定义功能（拒绝倒退）：
+  - Prompt管理系统（v2.0.0）- 零硬编码、可配置、Web管理
+  - 三级优先级Codex Prompt逻辑（拒绝上游硬编码方案）
+
+### Removed
+- 🗑️ 移除过度工程：Context Management Beta"智能检查"（PR #666）
+  - 原因：Claude Code 不使用该功能（发送的是 context-1m/web-search beta headers）
+  - 上游的简单删除是正确的
+
+### Technical Details
+- unifiedGeminiScheduler现在支持`allowApiAccounts`选项
+- 账户类型通过`accountType`字段区分（'gemini'或'gemini-api'）
+- 账户选择逻辑增强：支持if/else分支处理不同账户类型
+- 速率限制处理改进：动态选择rateLimitAccountType
+- 向后兼容：所有现有OAuth账户功能保持不变
+- 所有现有自定义功能保持不变
+- **Codex prompt内容同步**：
+  - 实现方式（HOW）：保留我们的promptLoader + 三级优先级系统
+  - 内容（WHAT）：同步上游新版prompt内容到resources/prompts/codex.txt
+  - 结果：最新prompt内容 + 零硬编码实现 = 最优方案
+
+### Rejected Changes
+- ❌ 拒绝上游openaiRoutes.js的硬编码instructions（commit 53d2f1ff）
+  - 原因：违反"拒绝硬编码"原则
+  - 我们的三级优先级系统更优（可配置、可管理、尊重用户输入）
+  - 但我们**接受prompt内容更新**，将其同步到resources/prompts/codex.txt
+
+---
+
 ## [2.0.23] - 2025-11-23
 
 ### Fixed
