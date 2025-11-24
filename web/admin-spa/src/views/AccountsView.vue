@@ -1139,7 +1139,10 @@
                       (account.platform === 'claude' ||
                         account.platform === 'claude-console' ||
                         account.platform === 'openai' ||
-                        account.platform === 'openai-responses') &&
+                        account.platform === 'openai-responses' ||
+                        account.platform === 'gemini' ||
+                        account.platform === 'gemini-api' ||
+                        account.platform === 'ccr') &&
                       (account.status === 'unauthorized' ||
                         account.status !== 'active' ||
                         account.rateLimitStatus?.isRateLimited ||
@@ -3054,6 +3057,8 @@ const resetAccountStatus = async (account) => {
       endpoint = `/admin/droid-accounts/${account.id}/reset-status`
     } else if (account.platform === 'gemini-api') {
       endpoint = `/admin/gemini-api-accounts/${account.id}/reset-status`
+    } else if (account.platform === 'gemini') {
+      endpoint = `/admin/gemini-accounts/${account.id}/reset-status`
     } else {
       showToast('不支持的账户类型', 'error')
       account.isResetting = false

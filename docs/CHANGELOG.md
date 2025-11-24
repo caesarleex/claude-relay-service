@@ -11,6 +11,27 @@
 
 ---
 
+## [2.0.25] - 2025-11-24
+
+### Added (from upstream v1.1.205 + v1.1.206)
+- 🔄 Gemini OAuth账户重置API
+  - `POST /gemini-accounts/:id/reset-rate-limit` - 重置限流状态
+  - `POST /gemini-accounts/:id/reset-status` - 重置账户状态
+- 🆕 geminiAccountService新增 `resetAccountStatus` 函数
+
+### Changed
+- ⚠️ 暂时禁用Gemini 429自动限流标记（跟随上游决策）
+  - standardGeminiRoutes.js中的429处理已被注释
+  - 原因：上游暂时移除此功能
+
+### Fixed
+- 🔧 修复Gemini/Gemini-API/CCR平台重置状态按钮未显示的问题
+
+### Merged
+- 🔀 合并上游v1.1.205 + v1.1.206
+
+---
+
 ## [2.0.24] - 2025-11-24
 
 ### Added (from upstream v1.1.204)
