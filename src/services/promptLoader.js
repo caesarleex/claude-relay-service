@@ -160,22 +160,19 @@ class PromptLoader {
    * @returns {Object} 健康状态信息
    */
   getHealthStatus() {
+    const validServices = this.getValidServices()
+    const promptsStatus = {}
+
+    for (const service of validServices) {
+      promptsStatus[service] = {
+        available: this.prompts[service] !== null,
+        length: this.prompts[service] ? this.prompts[service].length : 0
+      }
+    }
+
     return {
       loaded: this.loaded,
-      prompts: {
-        codex: {
-          available: this.prompts.codex !== null,
-          length: this.prompts.codex ? this.prompts.codex.length : 0
-        },
-        claudeCode: {
-          available: this.prompts.claudeCode !== null,
-          length: this.prompts.claudeCode ? this.prompts.claudeCode.length : 0
-        },
-        droid: {
-          available: this.prompts.droid !== null,
-          length: this.prompts.droid ? this.prompts.droid.length : 0
-        }
-      }
+      prompts: promptsStatus
     }
   }
 }
