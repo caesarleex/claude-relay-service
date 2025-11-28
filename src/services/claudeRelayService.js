@@ -2268,7 +2268,9 @@ class ClaudeRelayService {
       system: [
         {
           type: 'text',
-          text: this.claudeCodeSystemPrompt,
+          text:
+            promptLoader.getPrompt('claudeCode') ||
+            "You are Claude Code, Anthropic's official CLI for Claude.",
           cache_control: {
             type: 'ephemeral'
           }
@@ -2332,11 +2334,12 @@ class ClaudeRelayService {
       logger.info(`✅ Test request completed for account: ${account.name}`)
     } catch (error) {
       logger.error(`❌ Test account connection failed:`, error)
-      // 发送错误事件给前端
+      // 发送错误事件给前端并关闭流
       if (!responseStream.destroyed && !responseStream.writableEnded) {
         try {
           const errorMsg = error.message || '测试失败'
           responseStream.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg })}\n\n`)
+          responseStream.end()
         } catch {
           // 忽略写入错误
         }

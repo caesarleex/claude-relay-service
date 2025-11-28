@@ -30,6 +30,9 @@
   - 修复 Gemini API 类型账户绑定显示问题
   - 修复 API Key 窗口限制时间显示异常
   - Droid 增加 comm 端点支持
+- **Bug 修复**: 修复上游账户测试功能的响应流未关闭问题
+  - 问题：当账户不存在或 Token 获取失败时，SSE 响应流未调用 `end()`，导致前端一直等待
+  - 影响文件：`claudeRelayService.js`、`claudeConsoleRelayService.js`
 
 ---
 

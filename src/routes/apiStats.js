@@ -5,6 +5,7 @@ const apiKeyService = require('../services/apiKeyService')
 const CostCalculator = require('../utils/costCalculator')
 const claudeAccountService = require('../services/claudeAccountService')
 const openaiAccountService = require('../services/openaiAccountService')
+const promptLoader = require('../services/promptLoader')
 
 const router = express.Router()
 
@@ -848,7 +849,9 @@ router.post('/api-key/test', async (req, res) => {
       system: [
         {
           type: 'text',
-          text: "You are Claude Code, Anthropic's official CLI for Claude."
+          text:
+            promptLoader.getPrompt('claudeCode') ||
+            "You are Claude Code, Anthropic's official CLI for Claude."
         }
       ],
       max_tokens: 32000,
