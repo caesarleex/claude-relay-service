@@ -6,6 +6,47 @@
 
 ---
 
+## [v1.1.212 - v1.1.213] - 2025-11-28
+
+**合并到**: v2.0.28
+
+### Changed
+
+- **架构重构**: admin.js 模块化（fd2b8a01）
+  - 将 9916 行单文件拆分为 18 个模块
+  - 新增 `src/routes/admin/` 目录结构
+  - 我们额外创建 `prompts.js` 保留原创功能
+
+### Added
+
+- **requestIdentityService** (49645e8a): Claude 请求身份转换
+  - Stainless 指纹管理
+  - User ID 规范化
+  - 替换 runtimeAddon
+- **costRankService** (28caa93d): API Key 费用排序功能
+- **账户测试功能** (7db70e2d): Claude/Console 账户在线测试
+- **API Key 测试功能** (b58b8b1a): 支持 Claude 端点测试
+
+### Fixed
+
+- 修复 Gemini API 账户转发的传参问题 (4a0ba6ed)
+- 修复 Gemini API 类型账户绑定显示问题 (53553c7e)
+- 修复 API Key 窗口限制时间显示异常 (d9476230)
+- Droid 增加 comm 端点支持 (4aeb4706)
+
+### Technical
+
+- **Cherry-pick 提交**: 8 个
+- **新增模块**:
+  - `src/routes/admin/` (18 个模块)
+  - `src/routes/admin/prompts.js` (我们的原创)
+  - `src/services/requestIdentityService.js`
+  - `src/services/costRankService.js`
+  - `web/admin-spa/src/components/accounts/AccountTestModal.vue`
+  - `web/admin-spa/src/components/apikeys/ApiKeyTestModal.vue`
+
+---
+
 ## [v1.1.207 - v1.1.211] - 2025-11-27
 
 **合并到**: v2.0.26

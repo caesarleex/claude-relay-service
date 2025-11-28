@@ -9,6 +9,30 @@
 
 ---
 
+## [2.0.28] - 2025-11-28
+
+### Changed
+- **架构重构**: 模块化重构 `admin.js`（基于上游 v1.1.213）
+  - 将 10246 行单文件拆分为 18 个职责清晰的模块
+  - 新增 `src/routes/admin/prompts.js` 保留 v2.0.0 原创 Prompt 管理功能
+  - 零功能丢失，向后兼容
+
+### Added
+- **新功能**: 从上游 v1.1.213 合并
+  - `requestIdentityService`: Claude 请求身份转换（替换 runtimeAddon）
+  - `costRankService`: API Key 费用排序功能
+  - 账户测试功能: Claude/Console 账户在线测试
+  - API Key 测试功能: 支持 Claude 端点测试
+
+### Fixed
+- **Bug 修复**: 从上游 v1.1.213 合并
+  - 修复 Gemini API 账户转发的传参问题
+  - 修复 Gemini API 类型账户绑定显示问题
+  - 修复 API Key 窗口限制时间显示异常
+  - Droid 增加 comm 端点支持
+
+---
+
 ## [2.0.27] - 2025-11-28
 
 ### Changed
