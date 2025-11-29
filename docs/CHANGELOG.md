@@ -9,6 +9,31 @@
 
 ---
 
+## [2.0.29] - 2025-11-29
+
+### Changed
+- **架构优化**: 重写账户测试方法，实现测试与生产隔离
+  - `claudeRelayService.js`: 重写 `testAccountConnection` 方法
+  - `claudeConsoleRelayService.js`: 采用上游重写方案
+  - 测试不再触发账户状态变更（`markAccountUnauthorized` 等）
+  - 使用 `promptLoader` 获取系统提示词（零硬编码）
+
+### Added
+- **新功能**: 从上游 v1.1.214 合并
+  - Gemini-API 共享池调度修复（`isActive` 类型兼容）
+  - Gemini-API 分组调度设置修复（多分组支持）
+  - OpenAI-API 分组调度设置修复（支持 `openai-responses` 账户）
+  - 表格显示优化（固定列宽 + `ActionDropdown` 组件）
+
+### Fixed
+- **Bug 修复**: 从上游 v1.1.214 合并
+  - 修复 Gemini-API 账户共享池无法调度问题
+  - 修复 Gemini-API 账户分组调度设置不生效的问题
+  - 修复 OpenAI-API 账户分组调度设置问题
+  - 修复 Claude Console 账号 Test 未响应的 bug
+
+---
+
 ## [2.0.28] - 2025-11-28
 
 ### Changed

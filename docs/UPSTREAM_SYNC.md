@@ -6,6 +6,39 @@
 
 ---
 
+## [v1.1.214] - 2025-11-29
+
+**合并到**: v2.0.29
+
+### Fixed
+
+- 修复 Gemini-API 账户共享池无法调度问题 (63a7c251)
+  - 新增 `_isActive()` 辅助方法，兼容 `boolean` 和 `string` 类型
+- 修复 Gemini-API 账户分组调度设置不生效的问题 (d89344ad)
+  - 支持多分组模式 (`groupIds` 数组)
+  - 保持单分组向后兼容 (`groupId`)
+- 修复 OpenAI-API 账户分组调度设置问题 (326adaae)
+  - OpenAI Scheduler 同时支持 `openai` 和 `openai-responses` 账户类型
+- 修复 Claude Console 账号 Test 未响应的 bug (6ec4f4bf)
+  - 重写 `testAccountConnection` 方法，独立处理以隔离副作用
+  - **我们的改进**: 使用 `promptLoader` 替代硬编码 system prompt
+
+### Changed
+
+- 优化表格显示固定列宽 (68f00397)
+  - 新增 `ActionDropdown.vue` 组件
+  - `AccountsView.vue` 使用 sticky 列和固定宽度
+  - `ApiKeysView.vue` 同步改进
+
+### Technical
+
+- **Cherry-pick 提交**: 5 个
+- **我们的额外改进**:
+  - `claudeRelayService.js`: 同步重写 `testAccountConnection` 方法（上游未修复）
+  - 使用 `promptLoader.getPrompt('claudeCode')` 替代硬编码
+
+---
+
 ## [v1.1.212 - v1.1.213] - 2025-11-28
 
 **合并到**: v2.0.28
