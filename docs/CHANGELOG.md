@@ -9,6 +9,43 @@
 
 ---
 
+## [2.0.30] - 2025-12-02
+
+### Fixed
+
+- **严重 Bug 修复**: 修复 Claude API 400 错误 (tool_use/tool_result 不匹配)
+  - 问题：`_enforceCacheControlLimit` 方法删除整个内容块导致 tool_use 丢失
+  - 影响：删除 tool_use 导致后续 tool_result 找不到对应的 tool_use_id，产生 400 错误
+  - 修复：只删除 `cache_control` 属性，保留内容本身
+  - 影响文件：`src/services/claudeRelayService.js`
+- **Bug 修复**: 调整 Gemini-API BaseApi 后缀以适配更多端点
+  - 新增 `buildGeminiApiUrl()` 工具函数
+  - 兼容新旧 baseUrl 格式（以 /models 结尾 vs 不以 /models 结尾）
+  - 影响文件：`src/handlers/geminiHandlers.js`
+
+### Added
+
+- **功能增强**: Console 账号 count_tokens 端点智能判断
+  - 自动检测 Console 账户的 count_tokens 可用性
+  - 不可用时返回 fallback 响应 `{ input_tokens: 0 }`
+  - 新增状态管理方法：`markCountTokensUnavailable()`、`isCountTokensUnavailable()`
+  - 影响文件：`src/routes/api.js`、`src/services/claudeConsoleAccountService.js`
+
+### Changed
+
+- **前端优化**: 表格布局优化
+  - 优化 `AccountsView.vue` 和 `ApiKeysView.vue` 表格显示
+  - 改进响应式布局和列宽处理
+
+### Rejected
+
+- **拒绝合并**: 上游 e8e6f972 (增强 console 账号 test 端点)
+  - 拒绝理由：上游改动删除 `promptLoader` 和 P0/P1/P2/P3 优先级系统，与我们架构冲突
+  - 影响：会删除我们在 v2.0.29 实现的配置化架构，引入硬编码
+  - 决策：保持 v2.0.29 实现（使用 promptLoader，零硬编码，架构更优）
+
+---
+
 ## [2.0.29] - 2025-11-29
 
 ### Changed

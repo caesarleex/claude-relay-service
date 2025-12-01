@@ -6,6 +6,55 @@
 
 ---
 
+## [v1.1.215 - v1.1.217] - 2025-12-02
+
+**合并到**: v2.0.30
+
+### Fixed
+
+- 修复 Claude API 400 错误：tool_result/tool_use 不匹配问题 (249e2563) ✅
+  - `_enforceCacheControlLimit()` 从删除整个内容块改为只删除 `cache_control` 属性
+  - 避免删除 tool_use 导致 400 错误
+  - 避免删除用户消息导致上下文丢失
+- 调整 Gemini-API BaseApi 后缀以适配更多端点 (dfee7be9) ✅
+  - 新增 `buildGeminiApiUrl()` 工具函数
+  - 兼容新旧 baseUrl 格式（以 `/models` 结尾 vs 不以 `/models` 结尾）
+
+### Added
+
+- Console 账号 count_tokens 端点判断 (02018e10) ✅
+  - 自动检测并标记不可用的端点
+  - Fallback 响应机制：返回 `{ input_tokens: 0 }`
+  - 新增方法：`markCountTokensUnavailable()`、`isCountTokensUnavailable()`、`removeCountTokensUnavailable()`
+
+### Changed
+
+- 优化表格布局 (d3155b82) ✅
+  - `AccountsView.vue` 和 `ApiKeysView.vue` 布局改进
+
+### Rejected
+
+- **增强 console 账号 test 端点 (e8e6f972)** ❌
+  - **拒绝理由**: 上游改动删除 `promptLoader` 引用和 P0/P1/P2/P3 优先级系统
+  - **影响**:
+    - 删除 `const promptLoader = require('./promptLoader')`
+    - 删除配置化的优先级系统（Line 561-618）
+    - 引入硬编码：`this.claudeCodeSystemPrompt = "You are Claude Code..."`
+    - 删除我们在 v2.0.29 的 230+ 行独立实现
+    - 新增硬编码文件：`src/utils/testPayloadHelper.js`
+  - **决策**: 保持 v2.0.29 实现
+    - 我们的实现使用 `promptLoader`（零硬编码）
+    - 我们有完整的 P0/P1/P2/P3 优先级系统
+    - 架构更优，可配置化程度更高
+
+### Technical
+
+- **Cherry-pick 提交**: 4 个（成功）
+- **拒绝提交**: 1 个（e8e6f972，架构冲突）
+- **版本跨度**: v1.1.215、v1.1.216、v1.1.217
+
+---
+
 ## [v1.1.214] - 2025-11-29
 
 **合并到**: v2.0.29
