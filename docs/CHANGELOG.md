@@ -9,6 +9,22 @@
 
 ---
 
+## [2.0.31] - 2025-12-02
+
+### Added
+
+- **功能增强**: 支持 sessionKey (Cookie) 自动完成 OAuth 授权
+  - 新增 Cookie 自动授权流程，无需手动打开浏览器
+  - 支持批量创建账户（多 sessionKey 同时处理）
+  - 自动获取组织 UUID 和能力列表
+  - 新增 API 端点：`/admin/claude-accounts/oauth-with-cookie`
+  - 新增 API 端点：`/admin/claude-accounts/setup-token-with-cookie`
+  - 前端增加授权方式选择（手动/Cookie 自动）
+  - 前端增加 sessionKey 获取帮助说明
+  - 影响文件：`src/utils/oauthHelper.js`、`src/routes/admin/claudeAccounts.js`、前端组件
+
+---
+
 ## [2.0.30] - 2025-12-02
 
 ### Fixed

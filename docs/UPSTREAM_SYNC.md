@@ -6,6 +6,37 @@
 
 ---
 
+## [v1.1.218] - 2025-12-02
+
+**合并到**: v2.0.31
+
+### Added
+
+- 支持 sessionKey (Cookie) 自动完成 OAuth 授权 (81e89d2d) ✅
+  - 新增 `COOKIE_OAUTH_CONFIG` 配置常量
+  - 新增 `buildCookieHeaders()` 构建带 Cookie 的请求头
+  - 新增 `getOrganizationInfo()` 获取组织 UUID 和能力列表
+  - 新增 `authorizeWithCookie()` 使用 Cookie 获取授权 code
+  - 新增 `oauthWithCookie()` 完整的 Cookie 授权流程
+  - 新增 API 端点：`POST /admin/claude-accounts/oauth-with-cookie`
+  - 新增 API 端点：`POST /admin/claude-accounts/setup-token-with-cookie`
+  - 前端支持授权方式选择（手动/Cookie 自动）
+  - 前端支持批量 sessionKey 输入和处理
+  - 前端增加 sessionKey 获取帮助说明
+
+### Technical
+
+- **Cherry-pick 提交**: 1 个（成功）
+- **变更量**: +1145/-107 行
+- **影响文件**: 5 个
+  - `src/utils/oauthHelper.js`
+  - `src/routes/admin/claudeAccounts.js`
+  - `web/admin-spa/src/components/accounts/AccountForm.vue`
+  - `web/admin-spa/src/components/accounts/OAuthFlow.vue`
+  - `web/admin-spa/src/stores/accounts.js`
+
+---
+
 ## [v1.1.215 - v1.1.217] - 2025-12-02
 
 **合并到**: v2.0.30
