@@ -9,6 +9,25 @@
 
 ---
 
+## [2.0.33] - 2025-12-04
+
+### Added
+
+- **功能增强**: Claude Console 账户支持禁用自动防护开关 (from upstream v1.1.220)
+  - 新增 `disableAutoProtection` 配置项
+  - 启用后 401/400/429/529 错误不再自动禁用账户
+  - 错误仍记录日志并透传，用户可自行决定处理方式
+  - 影响文件：`claudeConsoleAccountService.js`、`claudeConsoleRelayService.js`、`claudeConsoleAccounts.js`、`AccountForm.vue`
+
+### Fixed
+
+- **Bug 修复**: 修复 Claude OAuth 账户连通性测试 404 错误
+  - 问题：`testAccountConnection` 方法错误拼接 URL 导致路径重复
+  - 修复：直接使用 `this.claudeApiUrl`，与正常转发方法保持一致
+  - 引入版本：v2.0.29，本版本修复
+
+---
+
 ## [2.0.32] - 2025-12-04
 
 ### Added

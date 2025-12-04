@@ -6,6 +6,31 @@
 
 ---
 
+## [v1.1.220] - 2025-12-04
+
+**合并到**: v2.0.33
+
+### Added
+
+- Claude Console 账户自动防护禁用开关 (8aca1f9d) ✅
+  - 新增 `disableAutoProtection` 配置项
+  - 启用后 401/400/429/529 错误不再自动禁用账户
+  - 错误仍记录日志并透传给客户端
+  - 前端新增复选框配置
+
+### Technical
+
+- **Cherry-pick 提交**: 1 个（成功）
+- **变更量**: +148/-22 行
+- **影响文件**: 4 个
+  - `src/services/claudeConsoleAccountService.js`
+  - `src/services/claudeConsoleRelayService.js`
+  - `src/routes/admin/claudeConsoleAccounts.js`
+  - `web/admin-spa/src/components/accounts/AccountForm.vue`
+- **排除文件**: `pnpm-lock.yaml`（我们使用 npm）
+
+---
+
 ## [v1.1.219] - 2025-12-04
 
 **合并到**: v2.0.32
