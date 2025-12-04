@@ -2287,8 +2287,8 @@ class ClaudeRelayService {
       // 发送测试开始事件
       sendSSEEvent('test_start', {})
 
-      // 准备请求配置
-      const apiEndpoint = `${this.claudeApiUrl}/v1/messages`
+      // 准备请求配置（直接使用配置的完整端点，与正常转发一致）
+      const apiEndpoint = this.claudeApiUrl
       const requestConfig = {
         method: 'POST',
         url: apiEndpoint,
