@@ -6,6 +6,37 @@
 
 ---
 
+## [v1.1.219] - 2025-12-04
+
+**合并到**: v2.0.32
+
+### Added
+
+- 账户列表排序支持正序/倒序切换 (9ad5c85c) ✅
+  - 前端 `AccountsView.vue` 增强
+  - 统一下拉框和表格标题排序变量
+  - 动态更新排序图标
+
+### Fixed
+
+- 过滤 Cloudflare CDN headers 以防止 API 安全检查 (5fd78b64) ✅
+  - 新增 `src/utils/headerFilter.js` 工具类
+  - 过滤 13 个 Cloudflare CDN headers
+  - 重构 `claudeRelayService.js` 和 `openaiResponsesRelayService.js` 的 header 过滤逻辑
+  - 解决 Cloudflare 橙色云模式下上游 API 403 问题
+
+### Technical
+
+- **Cherry-pick 提交**: 2 个（成功）
+- **变更量**: +183/-103 行
+- **影响文件**: 4 个
+  - `src/utils/headerFilter.js` (新增)
+  - `src/services/claudeRelayService.js`
+  - `src/services/openaiResponsesRelayService.js`
+  - `web/admin-spa/src/views/AccountsView.vue`
+
+---
+
 ## [v1.1.218] - 2025-12-02
 
 **合并到**: v2.0.31
