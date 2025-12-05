@@ -9,6 +9,36 @@
 
 ---
 
+## [2.0.34] - 2025-12-05
+
+### Added
+
+- **功能增强**: API Key 使用记录时间线功能 (from upstream v1.1.221-222)
+  - 新增 API Key 使用记录查看页面 (`ApiKeyUsageRecordsView.vue`)
+  - 新增使用记录详情弹窗 (`RecordDetailModal.vue`)
+  - 支持按时间范围筛选使用记录
+  - 新增路由 `/api-keys/:id/usage-records`
+  - 新增 API 端点：`GET /admin/api-keys/:id/usage-records`
+  - 影响文件：前端组件、路由、后端 usageStats.js
+
+### Fixed
+
+- **Bug 修复**: 修复 Gemini handlers ProxyAgent 调用方式错误 (from upstream v1.1.221)
+  - 问题：错误使用实例方法调用 `new ProxyHelper().createProxyAgent()`
+  - 修复：改为静态方法调用 `ProxyHelper.createProxyAgent()`
+  - 影响文件：`src/handlers/geminiHandlers.js`
+
+- **Bug 修复**: 修复 Dashboard 趋势图表显示问题 (from upstream v1.1.222)
+  - 修复日期过滤器显示
+  - 修复趋势图表数据渲染
+  - 影响文件：`DashboardView.vue`、`dashboard.js`
+
+- **UI 修复**: Modal 弹窗定位优化 (from upstream v1.1.221)
+  - 修复 `UsageDetailModal.vue` 弹窗位置问题
+  - ESLint no-shadow 规则修复
+
+---
+
 ## [2.0.33] - 2025-12-04
 
 ### Added

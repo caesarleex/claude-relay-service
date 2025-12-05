@@ -6,6 +6,51 @@
 
 ---
 
+## [v1.1.221 - v1.1.222] - 2025-12-05
+
+**合并到**: v2.0.34
+
+### Added
+
+- API Key 使用记录时间线功能 (92b30e19, 9fe2918a, 6a3dce52) ✅
+  - 新增 API Key 使用记录查看页面
+  - 新增使用记录详情弹窗
+  - 新增后端 API 端点
+  - 新增前端路由
+
+### Fixed
+
+- 修复 Gemini handlers ProxyAgent 调用方式 (b61e1062) ✅
+  - 实例方法改为静态方法调用
+  - `new ProxyHelper().createProxyAgent()` → `ProxyHelper.createProxyAgent()`
+
+- 修复 Dashboard 趋势图表和日期过滤器 (95ef04c1, 4919e392) ✅
+  - 日期过滤器显示问题
+  - 趋势图表数据渲染
+
+- Modal 弹窗定位和 ESLint 修复 (354d8da1, 3df0c7c6) ✅
+  - UsageDetailModal 定位优化
+  - no-shadow 规则修复
+
+### Technical
+
+- **Cherry-pick 提交**: 8 个（成功）
+- **变更量**: ~600 行
+- **影响文件**: 11 个
+  - `src/handlers/geminiHandlers.js`
+  - `src/routes/admin/usageStats.js`
+  - `src/routes/admin/utils.js`
+  - `web/admin-spa/src/components/apikeys/RecordDetailModal.vue` (新增)
+  - `web/admin-spa/src/components/apikeys/UsageDetailModal.vue`
+  - `web/admin-spa/src/router/index.js`
+  - `web/admin-spa/src/stores/dashboard.js`
+  - `web/admin-spa/src/views/ApiKeyUsageRecordsView.vue` (新增)
+  - `web/admin-spa/src/views/ApiKeysView.vue`
+  - `web/admin-spa/src/views/DashboardView.vue`
+- **排除文件**: `pnpm-lock.yaml`（我们使用 npm）
+
+---
+
 ## [v1.1.220] - 2025-12-04
 
 **合并到**: v2.0.33
