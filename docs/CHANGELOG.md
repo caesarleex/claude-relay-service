@@ -9,6 +9,46 @@
 
 ---
 
+## [2.0.35] - 2025-12-06
+
+### Added
+
+- **功能增强**: Pro 账户支持 Opus 4.5+ 模型 (from upstream v1.1.223)
+  - Pro 账号：支持 Opus 4.5+ 模型，不支持历史版本 (3.x/4.0/4.1)
+  - Free 账号：不支持任何 Opus 模型
+  - Max 账号：支持所有 Opus 版本
+  - 新增 `isOpus45OrNewer()` 模型版本检测函数
+  - 新增 `isProAccount()` 账户类型检测函数
+  - 影响文件：`modelHelper.js`、`claudeAccountService.js`、`unifiedClaudeScheduler.js`
+
+- **功能增强**: 上游不稳定错误检测与账户临时不可用机制 (from upstream v1.1.223)
+  - 5xx 错误自动标记账户临时不可用（5分钟 TTL）
+  - 专属账户临时不可用时自动回退到池
+  - 池账户选择时跳过临时不可用的账户
+  - 新增 `unstableUpstreamHelper.js` 工具
+  - 支持环境变量扩展检测规则
+  - 影响文件：`claudeRelayService.js`、`unifiedClaudeScheduler.js`
+
+- **功能增强**: 账户使用记录时间线 (from upstream v1.1.223)
+  - 新增 `/admin/accounts/:accountId/usage-records` 端点
+  - 新增 `AccountUsageRecordsView.vue` 页面
+  - 支持按账户聚合多 Key 记录并分页筛选
+  - 影响文件：`usageStats.js`、`router/index.js`、`AccountsView.vue`
+
+### Fixed
+
+- **模型限制重构**: 模型限制改为黑名单模式 (from upstream v1.1.223)
+  - 原：白名单模式（仅允许列表中的模型）
+  - 新：黑名单模式（禁止列表中的模型）
+  - 影响文件：`openaiClaudeRoutes.js`、`openaiRoutes.js`
+
+- **UI 优化**: ActionDropdown 和 CustomDropdown 改进 (from upstream v1.1.223)
+  - 优化下拉菜单位置计算
+  - 支持层级结构显示
+  - 全局互斥，避免多菜单堆叠
+
+---
+
 ## [2.0.34] - 2025-12-05
 
 ### Added

@@ -1,6 +1,3 @@
-# fork add
-# docs/ - 已移除，允许 docs 目录下的文档被版本控制
-
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -19,7 +16,7 @@ pnpm-debug.log*
 # MCP configuration (local only)
 .mcp.json
 .spec-workflow/
-.specify/
+
 # Data directory (contains sensitive information)
 data/
 !data/.gitkeep
@@ -29,6 +26,7 @@ redis_data/
 
 # Logs directory
 logs/
+logs1/
 *.log
 startup.log
 app.log

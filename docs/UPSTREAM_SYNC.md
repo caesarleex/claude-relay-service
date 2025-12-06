@@ -6,6 +6,52 @@
 
 ---
 
+## [v1.1.223] - 2025-12-06
+
+**合并到**: v2.0.35
+
+### Added
+
+- Pro 账户支持 Opus 4.5+ 模型 ✅
+  - 新增 `isOpus45OrNewer()` 模型版本检测
+  - 新增 `isProAccount()` 账户类型检测
+  - Pro 账号支持 Opus 4.5+，不支持历史版本
+  - 影响文件：`modelHelper.js`、`claudeAccountService.js`、`unifiedClaudeScheduler.js`
+
+- 上游不稳定错误检测与账户临时不可用机制 ✅
+  - 新增 `unstableUpstreamHelper.js`
+  - 5xx 错误自动标记账户临时不可用（5分钟 TTL）
+  - 影响文件：`claudeRelayService.js`、`unifiedClaudeScheduler.js`
+
+- 账户使用记录时间线 ✅
+  - 新增 `/admin/accounts/:accountId/usage-records` 端点
+  - 新增 `AccountUsageRecordsView.vue` 页面
+  - 影响文件：`usageStats.js`、`router/index.js`、`AccountsView.vue`
+
+### Fixed
+
+- 模型限制改为黑名单模式 ✅
+  - 原：白名单（仅允许列表中的模型）
+  - 新：黑名单（禁止列表中的模型）
+  - 影响文件：`openaiClaudeRoutes.js`、`openaiRoutes.js`
+
+- ActionDropdown 和 CustomDropdown 改进 ✅
+  - 优化下拉菜单位置计算
+  - 支持层级结构显示
+
+### Technical
+
+- **合并方式**: 手动合并（保留原创功能）
+- **变更量**: ~2000 行
+- **保留的原创功能**:
+  - promptLoader 及 P0/P1/P2/P3 优先级系统
+  - app.js 中的 promptLoader 初始化
+  - admin/index.js 中的 prompts 路由
+  - SettingsView.vue 中的 Prompts 管理 Tab
+- **排除文件**: `package.json`（保留我们的 express ^5 和 multer）
+
+---
+
 ## [v1.1.221 - v1.1.222] - 2025-12-05
 
 **合并到**: v2.0.34
