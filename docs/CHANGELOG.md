@@ -9,6 +9,19 @@
 
 ---
 
+## [2.0.36] - 2025-12-07
+
+### Added
+
+- **功能增强**: API Keys 模型筛选功能 (from upstream v1.1.224)
+  - 新增模型筛选下拉框，支持按使用过的模型筛选 API Keys
+  - CustomDropdown 组件支持多选模式 (`multiple` 属性)
+  - 新增 `GET /admin/api-keys/used-models` 端点获取所有已使用模型
+  - 新增 `getKeyIdsWithModels()` 和 `getAllUsedModels()` Redis 函数
+  - 影响文件：`redis.js`、`apiKeys.js`、`CustomDropdown.vue`、`ApiKeysView.vue`
+
+---
+
 ## [2.0.35] - 2025-12-06
 
 ### Added

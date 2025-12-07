@@ -6,6 +6,25 @@
 
 ---
 
+## [v1.1.224] - 2025-12-07
+
+**合并到**: v2.0.36
+
+### Added
+
+- API Keys 模型筛选功能 ✅
+  - 新增 `GET /admin/api-keys/used-models` 端点
+  - 新增 `getKeyIdsWithModels()` 和 `getAllUsedModels()` Redis 函数
+  - CustomDropdown 组件支持多选模式
+  - 影响文件：`redis.js`、`apiKeys.js`、`CustomDropdown.vue`、`ApiKeysView.vue`
+
+### Technical
+
+- **合并方式**: 直接采用上游版本（无冲突）
+- **变更量**: +221/-18 lines, 5 files
+
+---
+
 ## [v1.1.223] - 2025-12-06
 
 **合并到**: v2.0.35
