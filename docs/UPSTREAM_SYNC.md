@@ -6,6 +6,38 @@
 
 ---
 
+## [v1.1.228] - 2025-12-08
+
+**合并到**: v2.0.39
+
+### Fixed
+
+- 强制会话绑定首次会话 bug ✅
+  - 新增 `isOldSession()` 函数改进旧会话检测
+  - 检测 warmup 请求（单消息 + 无 tools）
+  - 检测多用户输入（content 数组分析）
+  - 影响文件：`api.js`
+
+- 账户数据格式修复 ✅
+  - `account.data` → `account`（直接返回账户对象）
+  - 影响文件：`claudeRelayConfigService.js`
+
+### Changed
+
+- UI 文案优化 ✅
+  - "全局会话绑定" → "强制会话绑定"
+  - 错误消息说明优化
+  - 影响文件：`SettingsView.vue`
+
+### Technical
+
+- **合并方式**: 混合（3文件直接采用 + 1文件手动合并）
+- **变更量**: +119/-29 lines, 5 files
+- **手动合并文件**:
+  - `SettingsView.vue`: 保留 prompts tab + 采用3处文案修改
+
+---
+
 ## [v1.1.227] - 2025-12-08
 
 **合并到**: v2.0.38

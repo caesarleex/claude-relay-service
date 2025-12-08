@@ -9,6 +9,22 @@
 
 ---
 
+## [2.0.39] - 2025-12-08
+
+### Fixed
+
+- **修复**: 强制会话绑定首次会话 bug (from upstream v1.1.228)
+  - 新增 `isOldSession()` 函数改进旧会话检测
+  - 修复账户数据格式问题（`account.data` → `account`）
+  - 影响文件：`api.js`、`claudeRelayConfigService.js`
+
+### Changed
+
+- **UI**: 文案优化 - "全局会话绑定"改为"强制会话绑定"
+  - 影响文件：`SettingsView.vue`
+
+---
+
 ## [2.0.38] - 2025-12-08
 
 ### Added
