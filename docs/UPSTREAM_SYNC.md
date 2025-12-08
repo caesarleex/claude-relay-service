@@ -6,6 +6,57 @@
 
 ---
 
+## [v1.1.227] - 2025-12-08
+
+**合并到**: v2.0.38
+
+### Added
+
+- Claude 会话强制绑定 ✅
+  - 新增 `claudeRelayConfigService.js` 配置服务
+  - 新增 `claudeRelayConfig.js` 管理路由
+  - 新增全局会话绑定开关 (globalSessionBindingEnabled)
+  - 新增仅 Claude Code 请求限制 (claudeCodeOnlyEnabled)
+  - 新增会话绑定 TTL 配置 (1-365天)
+  - 新增会话绑定错误消息自定义
+  - 新增会话绑定统计查询 API
+  - 影响文件：`claudeRelayConfigService.js`、`claudeRelayConfig.js`、`api.js`、`unifiedClaudeScheduler.js`、`auth.js`
+
+- SettingsView Claude 转发配置 Tab ✅
+  - 新增 Claude 转发设置界面
+  - 支持配置会话绑定参数
+  - 影响文件：`SettingsView.vue`
+
+- Explore agent 系统提示词模板优化 ✅
+  - 改进日志级别和模板处理
+  - 影响文件：`contents.js`、`claudeCodeValidator.js`
+
+### Fixed
+
+- API Keys 页面窗口费率显示问题 ✅
+  - 修复额外的显示问题
+  - 影响文件：`apiKeys.js`
+
+- Claude 参数传递格式统一 ✅
+  - 抽离 `_prepareRequestHeadersAndPayload` 公共方法
+  - 统一请求头和 payload 准备逻辑
+  - 影响文件：`claudeRelayService.js`
+
+- Header 过滤优化 ✅
+  - 改进过滤逻辑
+  - 影响文件：`headerFilter.js`
+
+### Technical
+
+- **合并方式**: 混合（2新文件 + 8文件直接采用 + 3文件手动合并）
+- **变更量**: +1433/-218 lines, 14 files
+- **手动合并文件**:
+  - `admin/index.js`: 保留 promptsRoutes + 添加 claudeRelayConfigRoutes
+  - `claudeRelayService.js`: 保留 promptLoader/P0-P3 系统 + 采用新方法抽取
+  - `SettingsView.vue`: 保留 prompts tab + 添加 claude tab
+
+---
+
 ## [v1.1.225-226] - 2025-12-08
 
 **合并到**: v2.0.37

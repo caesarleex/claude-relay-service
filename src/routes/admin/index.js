@@ -23,6 +23,7 @@ const dashboardRoutes = require('./dashboard')
 const usageStatsRoutes = require('./usageStats')
 const systemRoutes = require('./system')
 const concurrencyRoutes = require('./concurrency')
+const claudeRelayConfigRoutes = require('./claudeRelayConfig')
 const promptsRoutes = require('./prompts')
 
 // 挂载所有子路由
@@ -38,6 +39,7 @@ router.use('/', dashboardRoutes)
 router.use('/', usageStatsRoutes)
 router.use('/', systemRoutes)
 router.use('/', concurrencyRoutes)
+router.use('/', claudeRelayConfigRoutes)
 router.use('/', promptsRoutes)
 
 // 使用相对路径的模块（需要指定基础路径前缀）

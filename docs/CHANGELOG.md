@@ -9,6 +9,34 @@
 
 ---
 
+## [2.0.38] - 2025-12-08
+
+### Added
+
+- **功能增强**: Claude 会话强制绑定 (from upstream v1.1.227)
+  - 新增全局会话绑定开关，支持强制 Claude Code 请求
+  - 新增会话绑定 TTL 配置（1-365天）
+  - 新增会话绑定错误消息自定义
+  - 新增会话绑定统计查询 API
+  - 新增 `/admin/claude-relay-config` 配置端点
+  - 新增 SettingsView Claude 转发配置 Tab
+  - 影响文件：`claudeRelayConfigService.js`、`claudeRelayConfig.js`、`api.js`、`unifiedClaudeScheduler.js`、`SettingsView.vue`
+
+- **功能增强**: Explore agent 系统提示词模板优化 (from upstream v1.1.227)
+  - 改进日志级别和模板处理
+  - 影响文件：`contents.js`、`claudeCodeValidator.js`
+
+### Fixed
+
+- **修复**: API Keys 页面窗口费率显示问题 (from upstream v1.1.227)
+  - 影响文件：`apiKeys.js`
+
+- **修复**: Claude 参数传递格式统一 (from upstream v1.1.227)
+  - 抽离 `_prepareRequestHeadersAndPayload` 公共方法
+  - 影响文件：`claudeRelayService.js`
+
+---
+
 ## [2.0.37] - 2025-12-08
 
 ### Added
