@@ -9,6 +9,35 @@
 
 ---
 
+## [2.0.37] - 2025-12-08
+
+### Added
+
+- **功能增强**: 并发管理 API (from upstream v1.1.225)
+  - 新增 `/admin/concurrency` 端点查看所有并发状态
+  - 新增手动清理并发计数功能
+  - 新增并发租约最大生存时间保护（默认10分钟）
+  - 影响文件：`concurrency.js`、`auth.js`、`redis.js`
+
+- **功能增强**: Droid 增强 (from upstream v1.1.225-226)
+  - 支持账户级别自定义 User-Agent
+  - 动态 x-api-provider（-max 模型用 openai）
+  - OpenAI 格式 cache token 捕获
+  - User-Agent 版本更新至 0.32.1
+  - 影响文件：`droidRelayService.js`、`droidAccountService.js`、`AccountForm.vue`
+
+- **功能增强**: Docker 构建优化 (from upstream v1.1.225)
+  - 后端依赖与前端构建并行
+  - BuildKit 缓存加速
+
+### Fixed
+
+- **修复**: API Keys 窗口费率显示问题 (from upstream v1.1.226)
+  - 修复 rateLimitWindow 字符串比较问题
+  - 影响文件：`apiKeys.js`
+
+---
+
 ## [2.0.36] - 2025-12-07
 
 ### Added

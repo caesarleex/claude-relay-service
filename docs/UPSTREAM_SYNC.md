@@ -6,6 +6,52 @@
 
 ---
 
+## [v1.1.225-226] - 2025-12-08
+
+**合并到**: v2.0.37
+
+### Added (v1.1.225)
+
+- 并发管理 API ✅
+  - 新增 `concurrency.js` 路由
+  - 新增 `GET/DELETE /admin/concurrency` 端点
+  - 新增 Redis 并发管理函数 (+240行)
+  - 影响文件：`concurrency.js`、`redis.js`、`admin/index.js`
+
+- 并发租约保护 ✅
+  - 最大生存时间限制（默认10分钟）
+  - try-catch 防止并发泄漏
+  - 影响文件：`auth.js`
+
+- Droid 增强 ✅
+  - 自定义 User-Agent 支持
+  - 动态 x-api-provider（-max 用 openai）
+  - OpenAI 格式 cache token 捕获
+  - User-Agent 更新至 0.32.1
+  - 影响文件：`droidRelayService.js`、`droidAccountService.js`、`AccountForm.vue`
+
+- Docker 构建优化 ✅
+  - 后端依赖与前端构建并行
+  - BuildKit 缓存加速
+  - 影响文件：`Dockerfile`
+
+### Fixed (v1.1.226)
+
+- API Keys 窗口费率显示修复 ✅
+  - rateLimitWindow 显式转换为整数
+  - 影响文件：`apiKeys.js`
+
+### Technical
+
+- **合并方式**: 混合（7文件直接采用 + 3文件手动合并）
+- **变更量**: +548/-23 lines, 11 files
+- **手动合并文件**:
+  - `admin/index.js`: 保留 promptsRoutes + 添加 concurrencyRoutes
+  - `droidRelayService.js`: 保留 promptLoader + 添加新功能
+  - `api.js`: 保留 Client disconnected 处理 + 改用黑名单模式
+
+---
+
 ## [v1.1.224] - 2025-12-07
 
 **合并到**: v2.0.36
