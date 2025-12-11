@@ -197,22 +197,19 @@ class OpenAIResponsesRelayService {
           errorData
         })
 
-        if (response.status === 401 || response.status === 403) {
-          let reason =
-            response.status === 401
-              ? 'OpenAI Responses账号认证失败（401错误）'
-              : 'OpenAI Responses账号访问被拒绝（403错误）'
+        if (response.status === 401) {
+          let reason = 'OpenAI Responses账号认证失败（401错误）'
           if (errorData) {
             if (typeof errorData === 'string' && errorData.trim()) {
-              reason = `OpenAI Responses账号${response.status === 401 ? '认证失败' : '访问被拒绝'}（${response.status}错误）：${errorData.trim()}`
+              reason = `OpenAI Responses账号认证失败（401错误）：${errorData.trim()}`
             } else if (
               errorData.error &&
               typeof errorData.error.message === 'string' &&
               errorData.error.message.trim()
             ) {
-              reason = `OpenAI Responses账号${response.status === 401 ? '认证失败' : '访问被拒绝'}（${response.status}错误）：${errorData.error.message.trim()}`
+              reason = `OpenAI Responses账号认证失败（401错误）：${errorData.error.message.trim()}`
             } else if (typeof errorData.message === 'string' && errorData.message.trim()) {
-              reason = `OpenAI Responses账号${response.status === 401 ? '认证失败' : '访问被拒绝'}（${response.status}错误）：${errorData.message.trim()}`
+              reason = `OpenAI Responses账号认证失败（401错误）：${errorData.message.trim()}`
             }
           }
 
@@ -225,7 +222,7 @@ class OpenAIResponsesRelayService {
             )
           } catch (markError) {
             logger.error(
-              `❌ Failed to mark OpenAI-Responses account unauthorized after ${response.status}:`,
+              '❌ Failed to mark OpenAI-Responses account unauthorized after 401:',
               markError
             )
           }
@@ -336,22 +333,19 @@ class OpenAIResponsesRelayService {
           }
         }
 
-        if (status === 401 || status === 403) {
-          let reason =
-            status === 401
-              ? 'OpenAI Responses账号认证失败（401错误）'
-              : 'OpenAI Responses账号访问被拒绝（403错误）'
+        if (status === 401) {
+          let reason = 'OpenAI Responses账号认证失败（401错误）'
           if (errorData) {
             if (typeof errorData === 'string' && errorData.trim()) {
-              reason = `OpenAI Responses账号${status === 401 ? '认证失败' : '访问被拒绝'}（${status}错误）：${errorData.trim()}`
+              reason = `OpenAI Responses账号认证失败（401错误）：${errorData.trim()}`
             } else if (
               errorData.error &&
               typeof errorData.error.message === 'string' &&
               errorData.error.message.trim()
             ) {
-              reason = `OpenAI Responses账号${status === 401 ? '认证失败' : '访问被拒绝'}（${status}错误）：${errorData.error.message.trim()}`
+              reason = `OpenAI Responses账号认证失败（401错误）：${errorData.error.message.trim()}`
             } else if (typeof errorData.message === 'string' && errorData.message.trim()) {
-              reason = `OpenAI Responses账号${status === 401 ? '认证失败' : '访问被拒绝'}（${status}错误）：${errorData.message.trim()}`
+              reason = `OpenAI Responses账号认证失败（401错误）：${errorData.message.trim()}`
             }
           }
 
@@ -364,7 +358,7 @@ class OpenAIResponsesRelayService {
             )
           } catch (markError) {
             logger.error(
-              `❌ Failed to mark OpenAI-Responses account unauthorized in catch handler after ${status}:`,
+              '❌ Failed to mark OpenAI-Responses account unauthorized in catch handler:',
               markError
             )
           }
@@ -432,9 +426,9 @@ class OpenAIResponsesRelayService {
       const lines = data.split('\n')
 
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
+        if (line.startsWith('data:')) {
           try {
-            const jsonStr = line.slice(6)
+            const jsonStr = line.slice(5).trim()
             if (jsonStr === '[DONE]') {
               continue
             }
