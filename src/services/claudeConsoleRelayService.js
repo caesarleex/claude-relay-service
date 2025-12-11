@@ -787,8 +787,11 @@ class ClaudeConsoleRelayService {
       // 发送请求
       const request = axios(requestConfig)
 
+      // 注意：使用 .then(async ...) 模式处理响应
+      // - 内部的 releaseQueueLock 有独立的 try-catch，不会导致未捕获异常
+      // - queueLockAcquired = false 的赋值会在 finally 执行前完成（JS 单线程保证）
       request
-        .then((response) => {
+        .then(async (response) => {
           logger.debug(`🌊 Claude Console Claude stream response status: ${response.status}`)
 
           // 错误响应处理
