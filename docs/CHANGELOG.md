@@ -9,6 +9,45 @@
 
 ---
 
+## [2.0.41] - 2025-12-11
+
+### Changed
+
+- **优化**: 用户消息队列锁机制重构 (from upstream v1.1.231-232)
+  - 移除续租机制（`startLockRenewal`、`stopAllRenewalTimers`）
+  - 实现早期锁释放：请求发送后立即释放，无需等待响应完成
+  - 流式请求在收到 HTTP 200 响应头后通过回调释放锁
+  - 配置默认值优化：`lockTtlMs` 120s→5s, `timeoutMs` 60s→5s, `delayMs` 100→200ms
+  - 新增 `USER_MESSAGE_QUEUE_LOCK_TTL_MS` 环境变量支持
+  - 影响文件：`userMessageQueueService.js`、`claudeRelayService.js`、`claudeConsoleRelayService.js`、`app.js`、`config.example.js`
+
+- **日志改进**: 客户端断开连接日志级别优化 (from upstream v1.1.232)
+  - "Client disconnected" 从 ERROR 降为 INFO 级别
+  - 影响文件：`claudeConsoleRelayService.js`、`droidRelayService.js`、`ccrRelayService.js`、`openaiResponsesRelayService.js`
+
+### Security
+
+- **安全修复**: 避免真实令牌泄露到 DEBUG_HTTP_TRAFFIC 日志 (from upstream v1.1.231)
+
+---
+
+## [2.0.40] - 2025-12-10
+
+### Added
+
+- **功能增强**: 用户消息串行队列服务 (from upstream v1.1.229-230)
+  - 新增 `userMessageQueueService.js` 防止同账户并发用户消息触发限流
+  - 支持 Redis 分布式锁实现串行化
+  - 新增 Web 界面配置开关和参数调整
+  - 新增环境变量：`USER_MESSAGE_QUEUE_ENABLED`、`USER_MESSAGE_QUEUE_DELAY_MS`、`USER_MESSAGE_QUEUE_TIMEOUT_MS`
+  - 影响文件：`userMessageQueueService.js`、`claudeRelayService.js`、`claudeConsoleRelayService.js`、`bedrockRelayService.js`、`ccrRelayService.js`、`SettingsView.vue`
+
+### Changed
+
+- **文档更新**: CLAUDE.md 添加用户消息队列配置说明
+
+---
+
 ## [2.0.39] - 2025-12-08
 
 ### Fixed
