@@ -11,6 +11,7 @@ const {
   isAccountDisabledError
 } = require('../utils/errorSanitizer')
 const userMessageQueueService = require('./userMessageQueueService')
+const { isStreamWritable } = require('../utils/streamHelper')
 
 class ClaudeConsoleRelayService {
   constructor() {
@@ -518,10 +519,13 @@ class ClaudeConsoleRelayService {
             isBackendError ? { backendError: queueResult.errorMessage } : {}
           )
           if (!responseStream.headersSent) {
+            const existingConnection = responseStream.getHeader
+              ? responseStream.getHeader('Connection')
+              : null
             responseStream.writeHead(statusCode, {
               'Content-Type': 'text/event-stream',
               'Cache-Control': 'no-cache',
-              Connection: 'keep-alive',
+              Connection: existingConnection || 'keep-alive',
               'x-user-message-queue-error': errorType
             })
           }
@@ -879,7 +883,7 @@ class ClaudeConsoleRelayService {
                   `🧹 [Stream] [SANITIZED] Error response to client: ${JSON.stringify(sanitizedError)}`
                 )
 
-                if (!responseStream.destroyed) {
+                if (isStreamWritable(responseStream)) {
                   responseStream.write(JSON.stringify(sanitizedError))
                   responseStream.end()
                 }
@@ -887,7 +891,7 @@ class ClaudeConsoleRelayService {
                 const sanitizedText = sanitizeErrorMessage(errorDataForCheck)
                 logger.error(`🧹 [Stream] [SANITIZED] Error response to client: ${sanitizedText}`)
 
-                if (!responseStream.destroyed) {
+                if (isStreamWritable(responseStream)) {
                   responseStream.write(sanitizedText)
                   responseStream.end()
                 }
@@ -924,11 +928,22 @@ class ClaudeConsoleRelayService {
           })
 
           // 设置响应头
+          // ⚠️ 关键修复：尊重 auth.js 提前设置的 Connection: close
+          // 当并发队列功能启用时，auth.js 会设置 Connection: close 来禁用 Keep-Alive
           if (!responseStream.headersSent) {
+            const existingConnection = responseStream.getHeader
+              ? responseStream.getHeader('Connection')
+              : null
+            const connectionHeader = existingConnection || 'keep-alive'
+            if (existingConnection) {
+              logger.debug(
+                `🔌 [Console Stream] Preserving existing Connection header: ${existingConnection}`
+              )
+            }
             responseStream.writeHead(200, {
               'Content-Type': 'text/event-stream',
               'Cache-Control': 'no-cache',
-              Connection: 'keep-alive',
+              Connection: connectionHeader,
               'X-Accel-Buffering': 'no'
             })
           }
@@ -954,20 +969,28 @@ class ClaudeConsoleRelayService {
               buffer = lines.pop() || ''
 
               // 转发数据并解析usage
-              if (lines.length > 0 && !responseStream.destroyed) {
-                const linesToForward = lines.join('\n') + (lines.length > 0 ? '\n' : '')
+              if (lines.length > 0) {
+                // 检查流是否可写（客户端连接是否有效）
+                if (isStreamWritable(responseStream)) {
+                  const linesToForward = lines.join('\n') + (lines.length > 0 ? '\n' : '')
 
-                // 应用流转换器如果有
-                if (streamTransformer) {
-                  const transformed = streamTransformer(linesToForward)
-                  if (transformed) {
-                    responseStream.write(transformed)
+                  // 应用流转换器如果有
+                  if (streamTransformer) {
+                    const transformed = streamTransformer(linesToForward)
+                    if (transformed) {
+                      responseStream.write(transformed)
+                    }
+                  } else {
+                    responseStream.write(linesToForward)
                   }
                 } else {
-                  responseStream.write(linesToForward)
+                  // 客户端连接已断开，记录警告（但仍继续解析usage）
+                  logger.warn(
+                    `⚠️ [Console] Client disconnected during stream, skipping ${lines.length} lines for account: ${account?.name || accountId}`
+                  )
                 }
 
-                // 解析SSE数据寻找usage信息
+                // 解析SSE数据寻找usage信息（无论连接状态如何）
                 for (const line of lines) {
                   if (line.startsWith('data:')) {
                     const jsonStr = line.slice(5).trimStart()
@@ -1075,7 +1098,7 @@ class ClaudeConsoleRelayService {
                 `❌ Error processing Claude Console stream data (Account: ${account?.name || accountId}):`,
                 error
               )
-              if (!responseStream.destroyed) {
+              if (isStreamWritable(responseStream)) {
                 // 如果有 streamTransformer（如测试请求），使用前端期望的格式
                 if (streamTransformer) {
                   responseStream.write(
@@ -1098,7 +1121,7 @@ class ClaudeConsoleRelayService {
           response.data.on('end', () => {
             try {
               // 处理缓冲区中剩余的数据
-              if (buffer.trim() && !responseStream.destroyed) {
+              if (buffer.trim() && isStreamWritable(responseStream)) {
                 if (streamTransformer) {
                   const transformed = streamTransformer(buffer)
                   if (transformed) {
@@ -1147,7 +1170,7 @@ class ClaudeConsoleRelayService {
               }
 
               // 确保流正确结束
-              if (!responseStream.destroyed) {
+              if (isStreamWritable(responseStream)) {
                 responseStream.end()
               }
 
@@ -1164,7 +1187,7 @@ class ClaudeConsoleRelayService {
               `❌ Claude Console stream error (Account: ${account?.name || accountId}):`,
               error
             )
-            if (!responseStream.destroyed) {
+            if (isStreamWritable(responseStream)) {
               // 如果有 streamTransformer（如测试请求），使用前端期望的格式
               if (streamTransformer) {
                 responseStream.write(
@@ -1212,14 +1235,17 @@ class ClaudeConsoleRelayService {
 
           // 发送错误响应
           if (!responseStream.headersSent) {
+            const existingConnection = responseStream.getHeader
+              ? responseStream.getHeader('Connection')
+              : null
             responseStream.writeHead(error.response?.status || 500, {
               'Content-Type': 'text/event-stream',
               'Cache-Control': 'no-cache',
-              Connection: 'keep-alive'
+              Connection: existingConnection || 'keep-alive'
             })
           }
 
-          if (!responseStream.destroyed) {
+          if (isStreamWritable(responseStream)) {
             // 如果有 streamTransformer（如测试请求），使用前端期望的格式
             if (streamTransformer) {
               responseStream.write(
@@ -1386,7 +1412,7 @@ class ClaudeConsoleRelayService {
 
     // 辅助函数：发送 SSE 事件
     const sendSSEEvent = (type, data) => {
-      if (!responseStream.destroyed && !responseStream.writableEnded) {
+      if (isStreamWritable(responseStream)) {
         try {
           responseStream.write(`data: ${JSON.stringify({ type, ...data })}\n\n`)
         } catch {
@@ -1397,7 +1423,7 @@ class ClaudeConsoleRelayService {
 
     // 辅助函数：结束测试并关闭流
     const endTest = (success, error = null) => {
-      if (!responseStream.destroyed && !responseStream.writableEnded) {
+      if (isStreamWritable(responseStream)) {
         try {
           if (success) {
             sendSSEEvent('test_complete', { success: true })
@@ -1425,10 +1451,13 @@ class ClaudeConsoleRelayService {
 
       // 设置响应头
       if (!responseStream.headersSent) {
+        const existingConnection = responseStream.getHeader
+          ? responseStream.getHeader('Connection')
+          : null
         responseStream.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
+          Connection: existingConnection || 'keep-alive',
           'X-Accel-Buffering': 'no'
         })
       }
@@ -1577,7 +1606,7 @@ class ClaudeConsoleRelayService {
         response.data.on('end', () => {
           logger.info(`✅ Test request completed for account: ${account.name}`)
           // 如果还没结束，发送完成事件
-          if (!responseStream.destroyed && !responseStream.writableEnded) {
+          if (isStreamWritable(responseStream)) {
             endTest(true)
           }
           resolve()

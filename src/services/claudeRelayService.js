@@ -17,6 +17,7 @@ const { formatDateWithTimezone } = require('../utils/dateHelper')
 const requestIdentityService = require('./requestIdentityService')
 const { createClaudeTestPayload } = require('../utils/testPayloadHelper')
 const userMessageQueueService = require('./userMessageQueueService')
+const { isStreamWritable } = require('../utils/streamHelper')
 
 class ClaudeRelayService {
   constructor() {
@@ -1707,7 +1708,7 @@ class ClaudeRelayService {
                 }
               })()
             }
-            if (!responseStream.destroyed) {
+            if (isStreamWritable(responseStream)) {
               // 解析 Claude API 返回的错误详情
               let errorMessage = `Claude API error: ${res.statusCode}`
               try {
@@ -1772,16 +1773,23 @@ class ClaudeRelayService {
             buffer = lines.pop() || '' // 保留最后的不完整行
 
             // 转发已处理的完整行到客户端
-            if (lines.length > 0 && !responseStream.destroyed) {
-              const linesToForward = lines.join('\n') + (lines.length > 0 ? '\n' : '')
-              // 如果有流转换器，应用转换
-              if (streamTransformer) {
-                const transformed = streamTransformer(linesToForward)
-                if (transformed) {
-                  responseStream.write(transformed)
+            if (lines.length > 0) {
+              if (isStreamWritable(responseStream)) {
+                const linesToForward = lines.join('\n') + (lines.length > 0 ? '\n' : '')
+                // 如果有流转换器，应用转换
+                if (streamTransformer) {
+                  const transformed = streamTransformer(linesToForward)
+                  if (transformed) {
+                    responseStream.write(transformed)
+                  }
+                } else {
+                  responseStream.write(linesToForward)
                 }
               } else {
-                responseStream.write(linesToForward)
+                // 客户端连接已断开，记录警告（但仍继续解析usage）
+                logger.warn(
+                  `⚠️ [Official] Client disconnected during stream, skipping ${lines.length} lines for account: ${accountId}`
+                )
               }
             }
 
@@ -1886,7 +1894,7 @@ class ClaudeRelayService {
           } catch (error) {
             logger.error('❌ Error processing stream data:', error)
             // 发送错误但不破坏流，让它自然结束
-            if (!responseStream.destroyed) {
+            if (isStreamWritable(responseStream)) {
               responseStream.write('event: error\n')
               responseStream.write(
                 `data: ${JSON.stringify({
@@ -1902,7 +1910,7 @@ class ClaudeRelayService {
         res.on('end', async () => {
           try {
             // 处理缓冲区中剩余的数据
-            if (buffer.trim() && !responseStream.destroyed) {
+            if (buffer.trim() && isStreamWritable(responseStream)) {
               if (streamTransformer) {
                 const transformed = streamTransformer(buffer)
                 if (transformed) {
@@ -1914,7 +1922,7 @@ class ClaudeRelayService {
             }
 
             // 确保流正确结束
-            if (!responseStream.destroyed) {
+            if (isStreamWritable(responseStream)) {
               responseStream.end()
             }
           } catch (error) {
@@ -2113,14 +2121,17 @@ class ClaudeRelayService {
         }
 
         if (!responseStream.headersSent) {
+          const existingConnection = responseStream.getHeader
+            ? responseStream.getHeader('Connection')
+            : null
           responseStream.writeHead(statusCode, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            Connection: 'keep-alive'
+            Connection: existingConnection || 'keep-alive'
           })
         }
 
-        if (!responseStream.destroyed) {
+        if (isStreamWritable(responseStream)) {
           // 发送 SSE 错误事件
           responseStream.write('event: error\n')
           responseStream.write(
@@ -2140,13 +2151,16 @@ class ClaudeRelayService {
         logger.error(`❌ Claude stream request timeout | Account: ${account?.name || accountId}`)
 
         if (!responseStream.headersSent) {
+          const existingConnection = responseStream.getHeader
+            ? responseStream.getHeader('Connection')
+            : null
           responseStream.writeHead(504, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            Connection: 'keep-alive'
+            Connection: existingConnection || 'keep-alive'
           })
         }
-        if (!responseStream.destroyed) {
+        if (isStreamWritable(responseStream)) {
           // 发送 SSE 错误事件
           responseStream.write('event: error\n')
           responseStream.write(
@@ -2494,11 +2508,15 @@ class ClaudeRelayService {
       const proxyAgent = await this._getProxyAgent(accountId)
 
       // 设置响应头
+      // ⚠️ 关键修复：尊重 auth.js 提前设置的 Connection: close
       if (!responseStream.headersSent) {
+        const existingConnection = responseStream.getHeader
+          ? responseStream.getHeader('Connection')
+          : null
         responseStream.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          Connection: 'keep-alive',
+          Connection: existingConnection || 'keep-alive',
           'X-Accel-Buffering': 'no'
         })
       }
@@ -2526,7 +2544,7 @@ class ClaudeRelayService {
     } catch (error) {
       logger.error(`❌ Test account connection failed:`, error)
       // 发送错误事件给前端
-      if (!responseStream.destroyed && !responseStream.writableEnded) {
+      if (isStreamWritable(responseStream)) {
         try {
           const errorMsg = error.message || '测试失败'
           responseStream.write(`data: ${JSON.stringify({ type: 'error', error: errorMsg })}\n\n`)

@@ -7,7 +7,7 @@ services:
   # 🚀 Claude Relay Service
   claude-relay:
     build: .
-    image: caesarleex/claude-relay-service:latest
+    image: weishaw/claude-relay-service:latest
     restart: unless-stopped
     ports:
       # 绑定地址：生产环境建议使用反向代理，设置 BIND_HOST=127.0.0.1
@@ -20,6 +20,9 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
+      
+      # 🔧 请求体大小配置
+      - REQUEST_MAX_SIZE_MB=60
       
       # 🔐 安全配置（必填）
       - JWT_SECRET=${JWT_SECRET}  # 必填：至少32字符的随机字符串
