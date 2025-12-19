@@ -211,7 +211,17 @@ class ClaudeRelayService {
           logger.error('❌ accountId missing for queue lock in relayRequest')
           throw new Error('accountId missing for queue lock')
         }
-        const queueResult = await userMessageQueueService.acquireQueueLock(accountId)
+        // 获取账户信息以检查账户级串行队列配置
+        const accountForQueue = await claudeAccountService.getAccount(accountId)
+        const accountConfig = accountForQueue
+          ? { maxConcurrency: parseInt(accountForQueue.maxConcurrency || '0', 10) }
+          : null
+        const queueResult = await userMessageQueueService.acquireQueueLock(
+          accountId,
+          null,
+          null,
+          accountConfig
+        )
         if (!queueResult.acquired && !queueResult.skipped) {
           // 区分 Redis 后端错误和队列超时
           const isBackendError = queueResult.error === 'queue_backend_error'
@@ -1332,7 +1342,17 @@ class ClaudeRelayService {
           logger.error('❌ [Stream] accountId missing for queue lock')
           throw new Error('accountId missing for queue lock')
         }
-        const queueResult = await userMessageQueueService.acquireQueueLock(accountId)
+        // 获取账户信息以检查账户级串行队列配置
+        const accountForQueue = await claudeAccountService.getAccount(accountId)
+        const accountConfig = accountForQueue
+          ? { maxConcurrency: parseInt(accountForQueue.maxConcurrency || '0', 10) }
+          : null
+        const queueResult = await userMessageQueueService.acquireQueueLock(
+          accountId,
+          null,
+          null,
+          accountConfig
+        )
         if (!queueResult.acquired && !queueResult.skipped) {
           // 区分 Redis 后端错误和队列超时
           const isBackendError = queueResult.error === 'queue_backend_error'
@@ -2451,13 +2471,33 @@ class ClaudeRelayService {
     }
   }
 
+  // 🔧 准备测试请求的公共逻辑（供 testAccountConnection 和 testAccountConnectionSync 共用）
+  async _prepareAccountForTest(accountId) {
+    // 获取账户信息
+    const account = await claudeAccountService.getAccount(accountId)
+    if (!account) {
+      throw new Error('Account not found')
+    }
+
+    // 获取有效的访问token
+    const accessToken = await claudeAccountService.getValidAccessToken(accountId)
+    if (!accessToken) {
+      throw new Error('Failed to get valid access token')
+    }
+
+    // 获取代理配置
+    const proxyAgent = await this._getProxyAgent(accountId)
+
+    return { account, accessToken, proxyAgent }
+  }
+
   // 🧪 测试账号连接（供Admin API使用，直接复用 _makeClaudeStreamRequestWithUsageCapture）
-  async testAccountConnection(accountId, responseStream) {
+  async testAccountConnection(accountId, responseStream, model = 'claude-sonnet-4-5-20250929') {
     // 从 promptLoader 获取 Claude Code 系统提示词
     const claudeCodePrompt = promptLoader.getPrompt('claudeCode')
 
     const testRequestBody = {
-      model: 'claude-sonnet-4-5-20250929',
+      model: model,
       messages: [
         {
           role: 'user',
@@ -2490,22 +2530,9 @@ class ClaudeRelayService {
     }
 
     try {
-      // 获取账户信息
-      const account = await claudeAccountService.getAccount(accountId)
-      if (!account) {
-        throw new Error('Account not found')
-      }
+      const { account, accessToken, proxyAgent } = await this._prepareAccountForTest(accountId)
 
       logger.info(`🧪 Testing Claude account connection: ${account.name} (${accountId})`)
-
-      // 获取有效的访问token
-      const accessToken = await claudeAccountService.getValidAccessToken(accountId)
-      if (!accessToken) {
-        throw new Error('Failed to get valid access token')
-      }
-
-      // 获取代理配置
-      const proxyAgent = await this._getProxyAgent(accountId)
 
       // 设置响应头
       // ⚠️ 关键修复：尊重 auth.js 提前设置的 Connection: close
@@ -2553,6 +2580,153 @@ class ClaudeRelayService {
         }
       }
       throw error
+    }
+  }
+
+  // 🧪 非流式测试账号连接（供定时任务使用）
+  // 复用流式请求方法，收集结果后返回
+  async testAccountConnectionSync(accountId, model = 'claude-sonnet-4-5-20250929') {
+    // 从 promptLoader 获取 Claude Code 系统提示词
+    const claudeCodePrompt = promptLoader.getPrompt('claudeCode')
+
+    const testRequestBody = {
+      model: model,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'hi',
+              cache_control: {
+                type: 'ephemeral'
+              }
+            }
+          ]
+        }
+      ],
+      system: [
+        {
+          type: 'text',
+          text: claudeCodePrompt || this.claudeCodeSystemPrompt,
+          cache_control: {
+            type: 'ephemeral'
+          }
+        }
+      ],
+      metadata: {
+        user_id: require('../utils/testPayloadHelper').generateSessionString()
+      },
+      max_tokens: 21333,
+      temperature: 1,
+      stream: true
+    }
+
+    const startTime = Date.now()
+
+    try {
+      // 使用公共方法准备测试所需的账户信息、token 和代理
+      const { account, accessToken, proxyAgent } = await this._prepareAccountForTest(accountId)
+
+      logger.info(`🧪 Testing Claude account connection (sync): ${account.name} (${accountId})`)
+
+      // 创建一个收集器来捕获流式响应
+      let responseText = ''
+      let capturedUsage = null
+      let capturedModel = model
+      let hasError = false
+      let errorMessage = ''
+
+      // 创建模拟的响应流对象
+      const mockResponseStream = {
+        headersSent: true, // 跳过设置响应头
+        write: (data) => {
+          // 解析 SSE 数据
+          if (typeof data === 'string' && data.startsWith('data: ')) {
+            try {
+              const jsonStr = data.replace('data: ', '').trim()
+              if (jsonStr && jsonStr !== '[DONE]') {
+                const parsed = JSON.parse(jsonStr)
+                // 提取文本内容
+                if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+                  responseText += parsed.delta.text
+                }
+                // 提取 usage 信息
+                if (parsed.type === 'message_delta' && parsed.usage) {
+                  capturedUsage = parsed.usage
+                }
+                // 提取模型信息
+                if (parsed.type === 'message_start' && parsed.message?.model) {
+                  capturedModel = parsed.message.model
+                }
+                // 检测错误
+                if (parsed.type === 'error') {
+                  hasError = true
+                  errorMessage = parsed.error?.message || 'Unknown error'
+                }
+              }
+            } catch {
+              // 忽略解析错误
+            }
+          }
+          return true
+        },
+        end: () => {},
+        destroyed: false,
+        socket: { destroyed: false },
+        writableEnded: false
+      }
+
+      // 创建流转换器
+      const streamTransformer = this._createTestStreamTransformer()
+
+      // 执行流式请求
+      await this._makeClaudeStreamRequestWithUsageCapture(
+        testRequestBody,
+        accessToken,
+        proxyAgent,
+        {},
+        mockResponseStream,
+        null,
+        accountId,
+        'claude-official',
+        null,
+        streamTransformer,
+        {},
+        false
+      )
+
+      const responseTime = Date.now() - startTime
+
+      if (hasError) {
+        return {
+          success: false,
+          accountId,
+          accountName: account.name,
+          error: errorMessage,
+          responseTime
+        }
+      }
+
+      return {
+        success: true,
+        accountId,
+        accountName: account.name,
+        model: capturedModel,
+        responseText: responseText.substring(0, 200), // 截断长回复
+        usage: capturedUsage,
+        responseTime
+      }
+    } catch (error) {
+      const responseTime = Date.now() - startTime
+      logger.error(`❌ Test account connection (sync) failed:`, error)
+
+      return {
+        success: false,
+        accountId,
+        error: error.message || 'Unknown error',
+        responseTime
+      }
     }
   }
 
