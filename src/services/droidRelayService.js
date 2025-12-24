@@ -1185,6 +1185,36 @@ class DroidRelayService {
       }
     }
 
+    // Comm 端点：在 messages 数组前注入 system 消息
+    if (endpointType === 'comm') {
+      if (this.systemPrompt && Array.isArray(processedBody.messages)) {
+        const hasSystemMessage = processedBody.messages.some((m) => m && m.role === 'system')
+
+        if (hasSystemMessage) {
+          // 如果已有 system 消息，在第一个 system 消息的 content 前追加
+          const firstSystemIndex = processedBody.messages.findIndex((m) => m && m.role === 'system')
+          if (firstSystemIndex !== -1) {
+            const existingContent = processedBody.messages[firstSystemIndex].content || ''
+            if (
+              typeof existingContent === 'string' &&
+              !existingContent.startsWith(this.systemPrompt)
+            ) {
+              processedBody.messages[firstSystemIndex] = {
+                ...processedBody.messages[firstSystemIndex],
+                content: this.systemPrompt + existingContent
+              }
+            }
+          }
+        } else {
+          // 如果没有 system 消息，在 messages 数组最前面插入
+          processedBody.messages = [
+            { role: 'system', content: this.systemPrompt },
+            ...processedBody.messages
+          ]
+        }
+      }
+    }
+
     // 处理 temperature 和 top_p 参数
     const hasValidTemperature =
       processedBody.temperature !== undefined && processedBody.temperature !== null

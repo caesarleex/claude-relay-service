@@ -268,7 +268,7 @@ class ClaudeConsoleRelayService {
       const response = await axios(requestConfig)
 
       // 📬 请求已发送成功，立即释放队列锁（无需等待响应处理完成）
-      // 因为 Claude API 限流基��请求发送时刻计算（RPM），不是请求完成时刻
+      // 因为 Claude API 限流基于请求发送时刻计算（RPM），不是请求完成时刻
       if (queueLockAcquired && queueRequestId && accountId) {
         try {
           await userMessageQueueService.releaseQueueLock(accountId, queueRequestId)
@@ -976,13 +976,18 @@ class ClaudeConsoleRelayService {
                   const linesToForward = lines.join('\n') + (lines.length > 0 ? '\n' : '')
 
                   // 应用流转换器如果有
+                  let dataToWrite = linesToForward
                   if (streamTransformer) {
                     const transformed = streamTransformer(linesToForward)
                     if (transformed) {
-                      responseStream.write(transformed)
+                      dataToWrite = transformed
+                    } else {
+                      dataToWrite = null
                     }
-                  } else {
-                    responseStream.write(linesToForward)
+                  }
+
+                  if (dataToWrite) {
+                    responseStream.write(dataToWrite)
                   }
                 } else {
                   // 客户端连接已断开，记录警告（但仍继续解析usage）
@@ -1172,11 +1177,32 @@ class ClaudeConsoleRelayService {
 
               // 确保流正确结束
               if (isStreamWritable(responseStream)) {
-                responseStream.end()
-              }
+                // 📊 诊断日志：流结束前状态
+                logger.info(
+                  `📤 [STREAM] Ending response | destroyed: ${responseStream.destroyed}, ` +
+                    `socketDestroyed: ${responseStream.socket?.destroyed}, ` +
+                    `socketBytesWritten: ${responseStream.socket?.bytesWritten || 0}`
+                )
 
-              logger.debug('🌊 Claude Console Claude stream response completed')
-              resolve()
+                // 禁用 Nagle 算法确保数据立即发送
+                if (responseStream.socket && !responseStream.socket.destroyed) {
+                  responseStream.socket.setNoDelay(true)
+                }
+
+                // 等待数据完全 flush 到客户端后再 resolve
+                responseStream.end(() => {
+                  logger.info(
+                    `✅ [STREAM] Response ended and flushed | socketBytesWritten: ${responseStream.socket?.bytesWritten || 'unknown'}`
+                  )
+                  resolve()
+                })
+              } else {
+                // 连接已断开，记录警告
+                logger.warn(
+                  `⚠️ [Console] Client disconnected before stream end, data may not have been received | account: ${account?.name || accountId}`
+                )
+                resolve()
+              }
             } catch (error) {
               logger.error('❌ Error processing stream end:', error)
               reject(error)
