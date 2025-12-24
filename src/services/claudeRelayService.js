@@ -392,23 +392,6 @@ class ClaudeRelayService {
         }
       }
 
-      // 📬 请求已发送成功，立即释放队列锁（无需等待响应处理完成）
-      // 因为 Claude API 限流基于请求发送时刻计算（RPM），不是请求完成时刻
-      if (queueLockAcquired && queueRequestId && selectedAccountId) {
-        try {
-          await userMessageQueueService.releaseQueueLock(selectedAccountId, queueRequestId)
-          queueLockAcquired = false // 标记已释放，防止 finally 重复释放
-          logger.debug(
-            `📬 User message queue lock released early for account ${selectedAccountId}, requestId: ${queueRequestId}`
-          )
-        } catch (releaseError) {
-          logger.error(
-            `❌ Failed to release user message queue lock early for account ${selectedAccountId}:`,
-            releaseError.message
-          )
-        }
-      }
-
       response.accountId = accountId
       response.accountType = accountType
 

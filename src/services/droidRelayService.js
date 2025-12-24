@@ -1157,7 +1157,7 @@ class DroidRelayService {
 
     // Comm 端点：在 messages 数组前注入 system 消息
     if (endpointType === 'comm') {
-      if (this.systemPrompt && Array.isArray(processedBody.messages)) {
+      if (droidPrompt && Array.isArray(processedBody.messages)) {
         const hasSystemMessage = processedBody.messages.some((m) => m && m.role === 'system')
 
         if (hasSystemMessage) {
@@ -1167,51 +1167,27 @@ class DroidRelayService {
             const existingContent = processedBody.messages[firstSystemIndex].content || ''
             if (
               typeof existingContent === 'string' &&
-              !existingContent.startsWith(this.systemPrompt)
+              !existingContent.startsWith(droidPrompt)
             ) {
               processedBody.messages[firstSystemIndex] = {
                 ...processedBody.messages[firstSystemIndex],
-                content: this.systemPrompt + existingContent
+                content: droidPrompt + existingContent
               }
+              logger.debug(`💬 前置注入 Droid prompt 到 Comm 端点 (${droidPrompt.length} chars)`)
             }
           }
         } else {
           // 如果没有 system 消息，在 messages 数组最前面插入
           processedBody.messages = [
-            { role: 'system', content: this.systemPrompt },
+            { role: 'system', content: droidPrompt },
             ...processedBody.messages
           ]
+          logger.debug(`💬 前置注入 Droid prompt 到 Comm 端点 (${droidPrompt.length} chars)`)
         }
-      }
-    }
-
-    // Comm 端点：在 messages 数组前注入 system 消息
-    if (endpointType === 'comm') {
-      if (this.systemPrompt && Array.isArray(processedBody.messages)) {
-        const hasSystemMessage = processedBody.messages.some((m) => m && m.role === 'system')
-
-        if (hasSystemMessage) {
-          // 如果已有 system 消息，在第一个 system 消息的 content 前追加
-          const firstSystemIndex = processedBody.messages.findIndex((m) => m && m.role === 'system')
-          if (firstSystemIndex !== -1) {
-            const existingContent = processedBody.messages[firstSystemIndex].content || ''
-            if (
-              typeof existingContent === 'string' &&
-              !existingContent.startsWith(this.systemPrompt)
-            ) {
-              processedBody.messages[firstSystemIndex] = {
-                ...processedBody.messages[firstSystemIndex],
-                content: this.systemPrompt + existingContent
-              }
-            }
-          }
-        } else {
-          // 如果没有 system 消息，在 messages 数组最前面插入
-          processedBody.messages = [
-            { role: 'system', content: this.systemPrompt },
-            ...processedBody.messages
-          ]
-        }
+      } else if (config.prompts.droid.enabled) {
+        logger.warn('⚠️ Droid prompt 加载失败，继续无前置注入')
+      } else {
+        logger.debug('🔇 Droid prompt 已禁用，不注入')
       }
     }
 
