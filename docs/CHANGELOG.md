@@ -9,6 +9,44 @@
 
 ---
 
+## [2.0.49] - 2025-12-24
+
+### Fixed
+
+- **修复**: 代码审计发现的合并冲突残留问题
+  - `claudeRelayService.js`: 移除重复的队列锁释放代码块（死代码）
+  - `droidRelayService.js`: 修复 comm 端点 prompt 注入
+    - 移除重复的代码块
+    - 将 `this.systemPrompt`（未定义）改为 `droidPrompt`（promptLoader）
+    - 添加日志保持与其他端点一致
+
+---
+
+## [2.0.48] - 2025-12-24
+
+### Added
+
+- **功能增强**: 403 错误重试机制 (from upstream v1.1.239)
+  - claude-official 账户遇到 403 错误时自动重试（最多 2 次，间隔 2 秒）
+  - 流式和非流式请求均支持
+  - 影响文件：`claudeRelayService.js`
+
+### Fixed
+
+- **修复**: Redis WRONGTYPE 错误 (from upstream v1.1.239)
+  - 并发清理前进行 zset 类型检查
+  - 自动清理遗留的非 zset 类型键
+  - 影响文件：`redis.js`、`app.js`
+
+### Changed
+
+- **优化**: 启动时清理并发排队计数器 (from upstream v1.1.239)
+  - 新增 `CLEAR_CONCURRENCY_QUEUES_ON_STARTUP` 环境变量（默认 true）
+  - 多实例部署时建议设为 false
+  - 影响文件：`app.js`
+
+---
+
 ## [2.0.41] - 2025-12-11
 
 ### Changed
