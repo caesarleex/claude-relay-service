@@ -16,6 +16,7 @@ const AccountsView = () => import('@/views/AccountsView.vue')
 const AccountUsageRecordsView = () => import('@/views/AccountUsageRecordsView.vue')
 const TutorialView = () => import('@/views/TutorialView.vue')
 const SettingsView = () => import('@/views/SettingsView.vue')
+const PromptsView = () => import('@/views/PromptsView.vue')
 const ApiStatsView = () => import('@/views/ApiStatsView.vue')
 
 const routes = [
@@ -144,6 +145,18 @@ const routes = [
         path: '',
         name: 'Settings',
         component: SettingsView
+      }
+    ]
+  },
+  {
+    path: '/prompts',
+    component: MainLayout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'Prompts',
+        component: PromptsView
       }
     ]
   },

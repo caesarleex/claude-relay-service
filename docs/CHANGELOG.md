@@ -9,6 +9,19 @@
 
 ---
 
+## [2.0.51] - 2025-12-25
+
+### Fixed
+
+- **修复**: Prompts 管理页面导航缺失问题
+  - Prompts 页面组件存在但未添加到导航栏
+  - 添加 `/prompts` 路由到 `router/index.js`
+  - 添加 Prompts 选项卡到 `TabBar.vue`（位于"使用教程"和"系统设置"之间）
+  - 修复 `MainLayout.vue` 中缺失的路由映射（`prompts` 和 `userManagement`）
+  - 影响文件：`router/index.js`、`TabBar.vue`、`MainLayout.vue`
+
+---
+
 ## [2.0.50] - 2025-12-25
 
 ### Security
@@ -22,9 +35,11 @@
 ### Added
 
 - **功能增强**: 账户导出同步 API (from upstream v1.1.240)
-  - 新增 `/api/accounts` 端点，支持导出所有账户数据
-  - 新增 `/api/proxies` 端点，支持导出所有代理配置
+  - 新增 `GET /admin/sync/export-accounts` 端点
+  - 导出所有账户数据（包含凭据和代理配置）
   - 支持 Sub2API 从 CRS 批量同步账户
+  - 需要参数 `include_secrets=true` 才能导出敏感信息
+  - 支持账户类型：Claude OAuth/Setup Token、Claude Console、OpenAI OAuth、OpenAI Responses
   - 影响文件：`sync.js`（新增）、`admin/index.js`
 
 ---
