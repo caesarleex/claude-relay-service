@@ -9,6 +9,26 @@
 
 ---
 
+## [2.0.50] - 2025-12-25
+
+### Security
+
+- **安全修复**: 鉴权检测重大漏洞修复 (from upstream v1.1.241)
+  - 防止伪造会话绕过管理员认证
+  - 验证会话必须包含 `username` 和 `loginTime` 字段
+  - 启动时自动清理无效/伪造的管理员会话
+  - 影响文件：`auth.js`、`app.js`、`web.js`
+
+### Added
+
+- **功能增强**: 账户导出同步 API (from upstream v1.1.240)
+  - 新增 `/api/accounts` 端点，支持导出所有账户数据
+  - 新增 `/api/proxies` 端点，支持导出所有代理配置
+  - 支持 Sub2API 从 CRS 批量同步账户
+  - 影响文件：`sync.js`（新增）、`admin/index.js`
+
+---
+
 ## [2.0.49] - 2025-12-24
 
 ### Fixed
